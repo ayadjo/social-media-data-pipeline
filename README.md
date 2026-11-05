@@ -24,3 +24,24 @@ This project serves as a practical implementation of core data engineering conce
   `id`, `snippet.title`, `snippet.description`, `statistics.subscriberCount`, `statistics.videoCount`
 * **CommentThread** (`commentThreads`): 
   `id`, `snippet.videoId`, `snippet.topLevelComment.snippet.textDisplay`, `snippet.topLevelComment.snippet.authorDisplayName`
+
+## 📌 Phase II: Data Ingestion
+
+* In this phase, a data flow was built that automatically collects data from the YouTube Data API and forwards it to two destinations: Kafka (streaming) and MinIO (batch).
+
+### Architecture
+
+```
+YouTube API → NiFi ─┬→ Kafka (youtube-streams) → streaming processing
+                    └→ MinIO (youtube-raw)     → batch processing
+```
+
+### Docker Infrastructure
+
+The whole stack is defined in `docker-compose.yml` and runs in isolated containers on a shared network (`de-network`). 
+
+| Service | Image | Purpose |
+|---|---|---|---|
+| **kafka** | `apache/kafka:3.8.0` | Real-time message streaming | 
+| **minio** | `scnd/minio-mirror:RELEASE.2025-09-07T16-13-09Z` | S3-compatible object storage (data lake) |
+| **nifi** | `apache/nifi:1.28.1` | Data ingestion and flow orchestration | 
